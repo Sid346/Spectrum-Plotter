@@ -14,7 +14,7 @@
 using namespace std;
 
 
-void DFT(const double* signal_time,
+void DFT(QVector<double> signal_time,
                  double* spectrum,
                  const int SIGLEN
                  )

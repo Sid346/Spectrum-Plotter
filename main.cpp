@@ -17,12 +17,6 @@ const double pie = 3.14159;
 int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
-
-	double freq = 400;
-	
-
-	
-
 	test w;
 	
 	w.show();

@@ -1,8 +1,8 @@
 #include "test.h"
 
-const int SIGLEN = 10000;
 
-extern void DFT(const double* signal_time,
+
+extern void DFT(QVector<double> signal_time,
 	double* spectrum,
 	const int SIGLEN
 );
@@ -17,40 +17,27 @@ test::test(QWidget *parent)
 	connect(ui.Load, SIGNAL(clicked()), this, SLOT(play()));
 	
 }
+extern QVector<double>* data_read(QString fileName);
 
 void test::play()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-		tr("Open Text file"), "", tr("Text Files (*.txt)"));
-	QFile file(fileName);
-	file.open(QIODevice::ReadOnly);
-	QTextStream in(&file);
-	double spectrum[SIGLEN / 2] = { 0.0 };
-	double signal[SIGLEN] = { 0.0 };
-	int i = 0;
-	while (!in.atEnd())
-	{
-			
-			QString line = in.readLine();
-			QTextStream lineStream(&line);
-			lineStream >> signal[i];
-			qDebug() << signal[i] << endl;
-			i++;
+		tr("Open Text file"), "", tr("Text Files (*.wav)"));
 
-	}
-	file.close();
-
+	QVector<double> signal = *data_read(fileName);
+	qDebug() << "The Length of input signal is : " << signal.size() << endl;
+	const int SIGLEN = signal.size();
 	QLineSeries* series0 = new QLineSeries();
 	series0->setName("scatter1");
-
+	double *spectrum = new double[SIGLEN/2];
 	DFT(signal, spectrum, SIGLEN);
 	for (int i = 0; i < SIGLEN / 2; i++) {
-		series0->append(i * 22050 / SIGLEN * 2, spectrum[i] / 1000);
+		series0->append(i * 22050 / (SIGLEN / 2), spectrum[i] / 100);
 	}
 	QChart* chart = new QChart();
 	QValueAxis* axisX = new QValueAxis;
 	QValueAxis* axisY = new QValueAxis;
-	axisX->setRange(0, 5000);
+	axisX->setRange(0, 22050);
 	axisY->setRange(0, 1);
 	chart->addSeries(series0);
 	chart->addAxis(axisX, Qt::AlignBottom);
