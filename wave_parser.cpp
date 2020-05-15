@@ -1,7 +1,7 @@
 #include "test.h"
 
 
-struct header
+typedef struct header
 {
     char fileformat[4];
     int file_size;
@@ -14,24 +14,29 @@ struct header
     int byte_rate;           					// bytes  per second
     short int bytes_per_frame;
     short int bits_per_sample;
-    char data_id[4];    					// "data" written in ascii
+    char data_id[4];
 }head;
 
-QVector<double>* data_read(QString filename) {
+QVector<double>* data_read(QString filename, int* freq) {
     QFile file(filename);
     QVector<double> *data = new QVector<double>;
+    
     file.open(QIODevice::ReadOnly);
-    QByteArray line = file.read(sizeof head);
-    qDebug() << line << endl;
+    head *header;
     char strm;
-    file.read(&strm,4);
-    //qDebug() << qFromLittleEndian<quint32>((uchar*)&strm);
-
+    file.read((char*)header,sizeof head);
+  
+    *freq  =  header->sample_rate;
+    file.read(&strm, sizeof(short));
     while (!file.atEnd())
     {
-        file.read(&strm,2);
-        if (qFromLittleEndian<short>((uchar*)&strm))
-            *data << (qFromLittleEndian<short>((uchar*)&strm))/65535.0;
+        
+        file.read(&strm, sizeof(short));
+        if (qFromLittleEndian<short>((uchar*)&strm)) {
+            short a = (qFromLittleEndian<short>((uchar*)&strm));
+            *data << (a/32778.00);
+           
+        }
     }
     file.close();
     return data;
