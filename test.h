@@ -11,11 +11,14 @@ class test : public QMainWindow
 
 public:
 	test(QWidget *parent = Q_NULLPTR);
-
+	QString fileName;
+	QVector<double> signal;
+	int freq;
 private:
 	Ui::testClass ui;
 	
 private slots:
 	void play();
+	void load();
 	
 };

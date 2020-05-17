@@ -15,28 +15,27 @@ typedef struct header
     short int bytes_per_frame;
     short int bits_per_sample;
     char data_id[4];
+    int data_size;
 }head;
 
 QVector<double>* data_read(QString filename, int* freq) {
     QFile file(filename);
-    QVector<double> *data = new QVector<double>;
-    
+   
     file.open(QIODevice::ReadOnly);
-    head *header;
+    head *header = new head;
     char strm;
     file.read((char*)header,sizeof head);
   
     *freq  =  header->sample_rate;
-    file.read(&strm, sizeof(short));
-    while (!file.atEnd())
+    int i = header->data_size;
+    QVector<double>* data = new  QVector<double>;
+ 
+    while (i >0)
     {
-        
         file.read(&strm, sizeof(short));
-        if (qFromLittleEndian<short>((uchar*)&strm)) {
-            short a = (qFromLittleEndian<short>((uchar*)&strm));
-            *data << (a/32778.00);
-           
-        }
+        short a = (qFromLittleEndian<short>((uchar*)&strm));
+        *data << (a/32767.00);
+        i -= 2;
     }
     file.close();
     return data;

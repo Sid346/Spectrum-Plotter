@@ -13,12 +13,14 @@
 
 using namespace std;
 
+void hamming(QVector<double> &signal_time, const int N) {
+    for (int i = 0; i < N; i++)
+        signal_time[i] *= (0.54 - 0.46 * cos(2*PI * i/N));
+}
 
 void DFT(QVector<double> signal_time,
                  double* spectrum,
-                 const int N,
-                 double *max,
-                 double *min
+                 const int N
                  )
 {
  
@@ -31,10 +33,6 @@ void DFT(QVector<double> signal_time,
                 out_imag[i] += signal_time[j] * -sin(2 * PI * i * j /N);
             }
         spectrum[i] = out_real[i]* out_real[i] + out_imag[i]* out_imag[i];
-        if (spectrum[i] > *max)
-            *max = spectrum[i];
-        if (spectrum[i] < *min)
-            *min = spectrum[i];
     }
 
 }
