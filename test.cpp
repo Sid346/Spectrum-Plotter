@@ -13,7 +13,7 @@ test::test(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-
+	ui.progressBar->setValue(0);
 	connect(ui.Load, SIGNAL(clicked()), this, SLOT(load()));
 	connect(ui.Calculate, SIGNAL(clicked()), this, SLOT(play()));
 	
@@ -21,10 +21,12 @@ test::test(QWidget *parent)
 extern QVector<double>* data_read(QString fileName,int* freq);
 
 void test::load() {
+	
 	test::fileName = QFileDialog::getOpenFileName(this,
 		tr("Open Text file"), "", tr("Text Files (*.wav)"));
-	
+	ui.progressBar->setValue(0);
 	test::signal = *data_read(test::fileName, &(test::freq));
+	ui.progressBar->setValue(20);
 	const int SIGLEN = test::signal.size();
 	QChart* chart = new QChart();
 	QValueAxis* axisX = new QValueAxis;
@@ -36,23 +38,27 @@ void test::load() {
 	chart->addAxis(axisY, Qt::AlignLeft);
 	QLineSeries* series0 = new QLineSeries();
 	int i = 0;
+	
 	while (i < SIGLEN) {
+		ui.progressBar->setValue(i*80/SIGLEN);
 		series0->append(i, signal[i]);
 		i++;
 	}
+	ui.progressBar->setValue(80);
 	axisY->setRange(-1, 1);
 	chart->addSeries(series0);
 	chart->legend()->setVisible(false);
 	series0->attachAxis(axisX);
-	
+	ui.progressBar->setValue(90);
 	series0->attachAxis(axisY);
 
 	ui.Signalview->setChart(chart);
-
+	ui.progressBar->setValue(100);
 }
 
 void test::play()
 {
+	ui.progressBar->setValue(0);
 	const int SIGLEN = test::signal.size();
 	QChart* chart = new QChart();
 	QValueAxis* axisX = new QValueAxis;
@@ -70,6 +76,7 @@ void test::play()
 	double* sum = new double[N / 2]{ 0.0 };
 
 	while ( i < SIGLEN-N) {
+		ui.progressBar->setValue(i*100/(SIGLEN - N));
 		QVector<double> window(signal.begin()+i, signal.begin() + i+ N);
 		hamming(window, N);
 		DFT(window, spectrum, N);
@@ -98,7 +105,7 @@ void test::play()
 	chart->legend()->setVisible(false);
 	series0->attachAxis(axisX);
 	series0->attachAxis(axisY);
-
+	ui.progressBar->setValue(100);
 	ui.Spectrumview->setChart(chart);
 
 }

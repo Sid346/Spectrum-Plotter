@@ -13,7 +13,7 @@ public:
 	test(QWidget *parent = Q_NULLPTR);
 	QString fileName;
 	QVector<double> signal;
-	int freq;
+	int freq = 0;
 private:
 	Ui::testClass ui;
 	
