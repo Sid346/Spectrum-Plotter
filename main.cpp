@@ -1,25 +1,25 @@
-#include "test.h"
-#include <QtWidgets/QApplication>
+#include "mainwindow.h"
+
+#include <QApplication>
+#include <QtCharts>
+#include <QChartView>
+#include <QLineSeries>
+#include <QValueAxis>
+#include <QChart>
+#include <math.h>
+#include <QVector>
 #include <QDebug>
-#include<math.h>
-#include<QtCharts/qchart.h>
-#include<QtCharts/qchartview.h>
-#include<QtCharts/qlineseries.h>
-#include<QtCharts/qvalueaxis.h>
-
-
-QT_CHARTS_USE_NAMESPACE
 
 #ifndef UseDFT
 
-const double pie = 3.14159;
+//const double pie = 3.14159;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	test w;
-	
-	w.show();
-	return a.exec();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 }
+
 #endif
