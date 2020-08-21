@@ -87,7 +87,7 @@ void MainWindow::play()
             ui->progressBar->setValue(i*100/(SIGLEN - N));
             QVector<double> window;
             window.resize(N);
-            for(int j = 0; j < N-1; j++){
+            for(int j = 0; j < N; j++){
                 window[j] = *(MainWindow::signal.begin() + j + i);
             }
             hamming(window, N);
@@ -129,7 +129,7 @@ void MainWindow::play()
         QValueAxis* axisX = new QValueAxis;
         QValueAxis* axisY = new QValueAxis;
 
-        axisX->setRange(0, freq/2);
+        axisX->setRange(0, freq / 2);
 
         chart->addAxis(axisX, Qt::AlignBottom);
         chart->addAxis(axisY, Qt::AlignLeft);
@@ -150,8 +150,8 @@ void MainWindow::play()
             hamming(window, N);
             FFT(window, spectrum, N);
 
-            for (long n = 0; n < N / 2; n++) {
-                sum[n] += spectrum[n];
+            for (int n = 0; n < N / 2; n++) {
+                sum[n] += spectrum[n] / SIGLEN;
             }
 
             i += N;
