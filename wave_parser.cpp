@@ -1,4 +1,4 @@
-#include "test.h"
+#include "mainwindow.h"
 
 
 typedef struct header
@@ -20,16 +20,16 @@ typedef struct header
 
 QVector<double>* data_read(QString filename, int* freq) {
     QFile file(filename);
-   
+
     file.open(QIODevice::ReadOnly);
     head *header = new head;
     char strm;
-    file.read((char*)header,sizeof head);
-  
+    file.read((char*)header,sizeof(head));
+
     *freq  =  header->sample_rate;
     int i = header->data_size;
     QVector<double>* data = new  QVector<double>;
- 
+
     while (i >0)
     {
         file.read(&strm, sizeof(short));
