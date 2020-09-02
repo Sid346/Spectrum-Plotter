@@ -31,6 +31,11 @@ void MainWindow::load() {
 
     MainWindow::fileName = QFileDialog::getOpenFileName(this,
         tr("Open Text file"), "", tr("Text Files (*.wav)"));
+
+    player = new QMediaPlayer;
+    MainWindow::file_url = QUrl::fromLocalFile(MainWindow::fileName);
+    player->setMedia(file_url);
+
     ui->progressBar->setValue(0);
     MainWindow::signal = *data_read(MainWindow::fileName, &(MainWindow::freq));
     ui->progressBar->setValue(20);
@@ -182,6 +187,21 @@ void MainWindow::play()
 
 }
 
+void MainWindow::on_Play_Audio_clicked()
+{
+    //QSound audio(MainWindow::fileName);
+    //audio.play();
+    if(player == NULL){
+        QMessageBox::about(this, "Error", "Please select audio file first");
+    }
+    else
+        player->play();
+}
+
+void MainWindow::on_Pause_Audio_clicked()
+{
+    player->pause();
+}
 
 MainWindow::~MainWindow()
 {
