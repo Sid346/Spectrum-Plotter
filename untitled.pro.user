@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.12.4, 2020-09-04T15:20:28. -->
+<!-- Written by QtCreator 4.12.4, 2020-09-06T15:43:34. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -320,7 +320,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">H:/Spectrum_plotter_new/build-untitled-Desktop_Qt_5_9_9_MSVC2015_64bit-Debug</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default"></value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
