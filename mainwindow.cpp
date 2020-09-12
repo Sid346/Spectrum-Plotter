@@ -13,6 +13,8 @@ extern void DFT(QVector<double> signal_time,
 extern void FFT(QVector<double> signal_time, double *spectrum, long samples);
 
 extern void hamming(QVector<double>& signal_time, const int N);
+extern QVector<double>* LMS(QVector<double> x, QVector<double> d, float delta, int L);
+
 //QVector<double> signal;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -26,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 extern QVector<double>* data_read(QString fileName,int* freq);
+extern void data_write(QVector<double> data, QString filename);
 
 void MainWindow::load() {
 
@@ -208,4 +211,61 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::on_OK_clicked()
+{
+    if(ui->comboBox->currentText() == "LMS"){
+        //int fs = MainWindow::freq;
+        int L = 16;
+        int M = MainWindow::signal.size();
+        int delay = L;
+        float delta = 0.005;
+        QVector<double> zd;
+        zd.resize(M);
+        for(int i = 0; i < delay - 1; i++){
+            zd[i] = 0;
+        }
+        for(int j = delay - 1; j < M; j++){
+            zd[j] = *(MainWindow::signal.begin() + j - delay + 1);
+        }
 
+        ui->progressBar->setValue(0);
+
+        QVector<double> y;
+        y.resize(M);
+        y = *LMS(zd, MainWindow::signal, delta, L);
+
+        data_write(y, "LMS_output.wav");
+
+        player->setMedia(QUrl("LMS_output.wav"));
+
+        ui->progressBar->setValue(20);
+
+        const int SIGLEN = y.size();
+        QChart* chart = new QChart();
+        QValueAxis* axisX = new QValueAxis;
+        QValueAxis* axisY = new QValueAxis;
+        axisX->setRange(0, SIGLEN);
+        axisX->setMinorTickCount(1);
+        axisX->setTickCount(10);
+        chart->addAxis(axisX, Qt::AlignBottom);
+        chart->addAxis(axisY, Qt::AlignLeft);
+        QLineSeries* series0 = new QLineSeries();
+        int i = 0;
+
+        while (i < SIGLEN) {
+            ui->progressBar->setValue(i*80/SIGLEN);
+            series0->append(i, y[i]);
+            i++;
+        }
+        ui->progressBar->setValue(80);
+        axisY->setRange(-1, 1);
+        chart->addSeries(series0);
+        chart->legend()->setVisible(false);
+        series0->attachAxis(axisX);
+        ui->progressBar->setValue(90);
+        series0->attachAxis(axisY);
+
+        ui->Signalview->setChart(chart);
+        ui->progressBar->setValue(100);
+    }
+}

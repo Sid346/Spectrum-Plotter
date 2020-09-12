@@ -17,12 +17,13 @@ typedef struct header
     char data_id[4];
     int data_size;
 }head;
+head *header = new head;
 
 QVector<double>* data_read(QString filename, int* freq) {
     QFile file(filename);
 
     file.open(QIODevice::ReadOnly);
-    head *header = new head;
+
     char strm;
     file.read((char*)header,sizeof(head));
 
@@ -39,4 +40,24 @@ QVector<double>* data_read(QString filename, int* freq) {
     }
     file.close();
     return data;
+}
+
+void data_write(QVector<double> data, QString filename){
+    QFile file(filename);
+
+    file.open(QIODevice::WriteOnly);
+    file.write((char*)header, sizeof(head));
+    int M = data.size();
+    for(int j = 0; j < M; j++){
+
+
+        data[j] = data[j] * 32767.00;
+        if((short)data[j] > 32767)
+                data[j] = 32767;
+
+        uint16_t t = (uint16_t)data[j];
+        file.write((char*)&t, sizeof(uint16_t));
+    }
+
+
 }

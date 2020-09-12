@@ -22,6 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     DFT.cpp \
     FFT.cpp \
+    LMS.cpp \
     main.cpp \
     mainwindow.cpp \
     wave_parser.cpp

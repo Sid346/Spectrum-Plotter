@@ -10,6 +10,7 @@
 #include <QSound>
 #include <QMediaPlayer>
 #include <QMessageBox>
+#include <QComboBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -34,5 +35,6 @@ private slots:
     void load();
     void on_Play_Audio_clicked();
     void on_Pause_Audio_clicked();
+    void on_OK_clicked();
 };
 #endif // MAINWINDOW_H
