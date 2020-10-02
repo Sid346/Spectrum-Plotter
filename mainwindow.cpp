@@ -6,14 +6,12 @@ extern void DFT(QVector<double> signal_time,
     const int SIGLEN
 );
 
-/*extern void FFT(QVector<double> signal_time,
-    double* spectrum,
-    const int SIGLEN
-);*/
-extern void FFT(QVector<double> signal_time, double *spectrum, long samples);
-
+extern void FFT(double *vReal, double *vImag, long samples, uint8_t dir);
 extern void hamming(QVector<double>& signal_time, const int N);
 extern QVector<double>* LMS(QVector<double> x, QVector<double> d, float delta, int L);
+extern QVector<double>* data_read(QString fileName,int* freq);
+extern void data_write(QVector<double> data, QString filename);
+double* Reverse_FFT(double *vReal, double *vImag, long N);
 
 //QVector<double> signal;
 
@@ -26,9 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->Load, SIGNAL(clicked()), this, SLOT(load()));
     connect(ui->Calculate, SIGNAL(clicked()), this, SLOT(play()));
 }
-
-extern QVector<double>* data_read(QString fileName,int* freq);
-extern void data_write(QVector<double> data, QString filename);
 
 void MainWindow::load() {
 
@@ -150,13 +145,23 @@ void MainWindow::play()
 
         while ( i < SIGLEN-N) {
             ui->progressBar->setValue(i*100/(SIGLEN - N));
+            double* vReal = new double[N]{ 0.0 };
+            double* vImag = new double[N]{ 0.0 };
             QVector<double> window;
             window.resize(N);
             for(int j = 0; j < N; j++){
                 window[j] = *(MainWindow::signal.begin() + j + i);
             }
-            hamming(window, N);
-            FFT(window, spectrum, N);
+            //hamming(window, N);
+            for(int p = 0; p < N; p++){
+                vReal[p] = window[p];
+            }
+
+            FFT(vReal, vImag, N, FFT_FORWARD);
+
+            for (long n = 0; n < N; n++) {
+                spectrum[n] = ((vReal[n] * vReal[n]) + (vImag[n] * vImag[n]));
+            }
 
             for (int n = 0; n < N / 2; n++) {
                 sum[n] += spectrum[n] / SIGLEN;
@@ -164,6 +169,7 @@ void MainWindow::play()
 
             i += N;
         }
+
         for (int n = 0; n < N / 2; n++) {
             if (sum[n] > maximum) {
                 maximum = sum[n];
@@ -268,4 +274,193 @@ void MainWindow::on_OK_clicked()
         ui->Signalview->setChart(chart);
         ui->progressBar->setValue(100);
     }
+    if(ui->comboBox->currentText() == "LP Filter"){
+
+        const int SIGLEN = MainWindow::signal.size();
+        int N = 1024;
+        double* spectrum_reverse = new double[N]{ 0.0 };
+        int i = 0;
+        double maximum = -DBL_MAX, minimum = DBL_MAX;
+        QVector<double> out;
+        out.resize(SIGLEN);
+        for(int t = 0; t < SIGLEN; t++){
+            out[t] = 0;
+        }
+        ui->progressBar->setValue(0);
+        while ( i < SIGLEN-N) {
+            ui->progressBar->setValue(i*100/(SIGLEN - N));
+            double* vReal = new double[N]{ 0.0 };
+            double* vImag = new double[N]{ 0.0 };
+            QVector<double> window;
+            window.resize(N);
+            for(int j = 0; j < N; j++){
+                window[j] = *(MainWindow::signal.begin() + j + i);
+            }
+            //hamming(window, N);
+            for(int p = 0; p < N; p++){
+                vReal[p] = window[p];
+            }
+
+            FFT(vReal, vImag, N, FFT_FORWARD);
+
+            for (long n = 0; n < N; n++) {
+                if(n > 170){                        //LP filter
+                    vReal[n] = 0;
+                    vImag[n] = 0;
+                }
+            }
+
+
+            spectrum_reverse = Reverse_FFT(vReal, vImag, N);
+            for(int k = i; k <i + N; k++){
+                out[k] = *(spectrum_reverse + k - i);
+                *(MainWindow::signal.begin() + k) = *(spectrum_reverse + k - i);
+            }
+
+            i += N;
+        }
+
+        data_write(out, "LPF_output.wav");
+        for (int n = 0; n < N / 2; n++) {
+            if (out[n] > maximum) {
+                maximum = out[n];
+            }
+
+            if (out[n] < minimum) {
+                minimum = out[n];
+            }
+        }
+        player->setMedia(QUrl("LPF_output.wav"));
+
+        QChart* chart = new QChart();
+        QValueAxis* axisX = new QValueAxis;
+        QValueAxis* axisY = new QValueAxis;
+        axisX->setRange(0, SIGLEN);
+        axisX->setMinorTickCount(1);
+        axisX->setTickCount(10);
+        chart->addAxis(axisX, Qt::AlignBottom);
+        chart->addAxis(axisY, Qt::AlignLeft);
+        QLineSeries* series0 = new QLineSeries();
+        int t = 0;
+
+        while (t < SIGLEN) {
+            ui->progressBar->setValue(t*80/SIGLEN);
+            series0->append(t, *(MainWindow::signal.begin() + t));
+            t++;
+        }
+        ui->progressBar->setValue(80);
+        axisY->setRange(-1, 1);
+        chart->addSeries(series0);
+        chart->legend()->setVisible(false);
+        series0->attachAxis(axisX);
+        ui->progressBar->setValue(90);
+        series0->attachAxis(axisY);
+
+        ui->Signalview->setChart(chart);
+        ui->progressBar->setValue(100);
+    }
+    if(ui->comboBox->currentText() == "HP Filter"){
+
+        const int SIGLEN = MainWindow::signal.size();
+        int N = 1024;
+        double* spectrum_reverse = new double[N]{ 0.0 };
+        int i = 0;
+        double maximum = -DBL_MAX, minimum = DBL_MAX;
+        QVector<double> out;
+        out.resize(SIGLEN);
+        for(int t = 0; t < SIGLEN; t++){
+            out[t] = 0;
+        }
+        ui->progressBar->setValue(0);
+        while ( i < SIGLEN-N) {
+            ui->progressBar->setValue(i*100/(SIGLEN - N));
+            double* vReal = new double[N]{ 0.0 };
+            double* vImag = new double[N]{ 0.0 };
+            QVector<double> window;
+            window.resize(N);
+            for(int j = 0; j < N; j++){
+                window[j] = *(MainWindow::signal.begin() + j + i);
+            }
+            //hamming(window, N);
+            for(int p = 0; p < N; p++){
+                vReal[p] = window[p];
+            }
+
+            FFT(vReal, vImag, N, FFT_FORWARD);
+
+            for (long n = 0; n < N; n++) {
+                if(n < 56){                        //HP filter
+                    vReal[n] = 0;
+                    vImag[n] = 0;
+                }
+            }
+
+
+            spectrum_reverse = Reverse_FFT(vReal, vImag, N);
+            for(int k = i; k <i + N; k++){
+                out[k] = *(spectrum_reverse + k - i);
+                *(MainWindow::signal.begin() + k) = *(spectrum_reverse + k - i);
+            }
+
+            i += N;
+        }
+
+        data_write(out, "HPF_output.wav");
+        for (int n = 0; n < N / 2; n++) {
+            if (out[n] > maximum) {
+                maximum = out[n];
+            }
+
+            if (out[n] < minimum) {
+                minimum = out[n];
+            }
+        }
+        player->setMedia(QUrl("HPF_output.wav"));
+
+        QChart* chart = new QChart();
+        QValueAxis* axisX = new QValueAxis;
+        QValueAxis* axisY = new QValueAxis;
+        axisX->setRange(0, SIGLEN);
+        axisX->setMinorTickCount(1);
+        axisX->setTickCount(10);
+        chart->addAxis(axisX, Qt::AlignBottom);
+        chart->addAxis(axisY, Qt::AlignLeft);
+        QLineSeries* series0 = new QLineSeries();
+        int t = 0;
+
+        while (t < SIGLEN) {
+            ui->progressBar->setValue(t*80/SIGLEN);
+            series0->append(t, *(MainWindow::signal.begin() + t));
+            t++;
+        }
+        ui->progressBar->setValue(80);
+        axisY->setRange(-1, 1);
+        chart->addSeries(series0);
+        chart->legend()->setVisible(false);
+        series0->attachAxis(axisX);
+        ui->progressBar->setValue(90);
+        series0->attachAxis(axisY);
+
+        ui->Signalview->setChart(chart);
+        ui->progressBar->setValue(100);
+    }
+}
+
+double *Reverse_FFT(double *vReal, double *vImag, long N){
+
+        double* spectrum_reverse = new double[N]{ 0.0 };
+        QVector<double> window;
+        window.resize(N);
+        FFT(vReal, vImag, N, FFT_REVERSE);
+
+        for (long i = 0; i < N; i++) {
+                window[i] = vReal[i];
+        }
+        //hamming(window, N);
+        for (long i = 0; i < N; i++) {
+                spectrum_reverse[i] = window[i];
+        }
+
+        return spectrum_reverse;
+
 }

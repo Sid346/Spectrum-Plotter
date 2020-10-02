@@ -54,22 +54,19 @@ uint8_t exponent(uint16_t value){
 }
 
 
-void FFT(QVector<double> signal_time, double *spectrum, long samples)
+void FFT(double *vReal, double *vImag ,long samples, uint8_t dir)
 {	// Computes in-place complex-to-complex FFT
     // Reverse bits
 
-    double* vReal = new double[samples]{ 0.0 };
-    double* vImag = new double[samples]{ 0.0 };
 
-    for(int i = 0; i < samples; i++){
-        vReal[i] = signal_time[i];
-    }
     uint8_t power = exponent(samples);
 
     uint16_t j = 0;
     for (uint16_t i = 0; i < (samples - 1); i++) {
         if (i < j) {
             Swap(&vReal[i], &vReal[j]);
+            if(dir == FFT_REVERSE)
+                            Swap(&vImag[i], &vImag[j]);
         }
         uint16_t k = (samples >> 1);
         while (k <= j) {
@@ -103,13 +100,16 @@ void FFT(QVector<double> signal_time, double *spectrum, long samples)
         }
         c2 = sqrt((1.0 - c1) / 2.0);
         c1 = sqrt((1.0 + c1) / 2.0);
-
-        c2 = -c2;
+        if (dir == FFT_FORWARD) {
+            c2 = -c2;
+        }
 
     }
-
-    for (long i = 0; i < samples; i++) {
-            spectrum[i] = ((vReal[i] * vReal[i]) + (vImag[i] * vImag[i]));
-            //spectrum[i] = vReal[i];
+    if (dir != FFT_FORWARD) {
+        for (uint16_t i = 0; i < samples; i++) {
+             vReal[i] /= samples;
+             vImag[i] /= samples;
         }
+    }
+
 }

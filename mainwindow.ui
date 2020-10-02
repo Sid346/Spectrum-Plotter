@@ -224,6 +224,16 @@
       <string>LMS</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>HP Filter</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>LP Filter</string>
+     </property>
+    </item>
    </widget>
    <widget class="QPushButton" name="OK">
     <property name="geometry">

@@ -12,6 +12,10 @@
 #include <QMessageBox>
 #include <QComboBox>
 
+#define FFT_FORWARD 0x01
+#define FFT_REVERSE 0x00
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
